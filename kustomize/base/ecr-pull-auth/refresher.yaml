@@ -23,8 +23,6 @@ spec:
               command: ["/bin/sh", "-ec"]
               args:
                 - |
-                  curl -fsSL "https://dl.k8s.io/release/$KUBECTL_VERSION_CHANNEL.txt" -o /tools/kubectl.version
-                  KUBECTL_VERSION="$(cat /tools/kubectl.version)"
                   curl -fsSL "https://dl.k8s.io/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl" -o /tools/kubectl
                   curl -fsSL "https://dl.k8s.io/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl.sha256" -o /tools/kubectl.sha256
                   echo "$(cat /tools/kubectl.sha256)  /tools/kubectl" | sha256sum -c -
