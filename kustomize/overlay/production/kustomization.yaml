@@ -5,5 +5,6 @@ resources:
   - namespace-resources/argocd
   - namespace-resources/cert-manager
   - namespace-resources/envoy-gateway
+  - namespace-resources/monitoring
   - namespace-resources/postgres
   - namespace-resources/sar-mel

@@ -1,2 +1,3 @@
 # PostgreSQL database credentials supplied as a private Helm values override.
 /helm/postgres/values-private.yaml
+/helm/prometheus-stack/values-private.yaml

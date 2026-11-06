@@ -1,0 +1,99 @@
+# Overrides for the existing `prometheus` release in `monitoring`, using
+# kube-prometheus-stack chart 57.0.0. Apply with that same release and namespace.
+#
+# Storage migration note: the current Prometheus and Alertmanager data is
+# ephemeral. Moving to PVCs restarts the StatefulSets and does not copy old
+# emptyDir data into the new claims. Back up anything that must be retained.
+
+prometheus:
+  prometheusSpec:
+    # Keep metric data across pod reschedules. Size this to observed ingest and
+    # retention; the current node disk is 30 GiB, so 50 GiB would not fit.
+    retention: 15d
+    retentionSize: 8GB
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 768Mi
+      limits:
+        cpu: "1"
+        memory: 1536Mi
+
+    # Allow ServiceMonitors and PodMonitors in any namespace. Apply suitable
+    # labels/selectors if discovery should be restricted later.
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorNamespaceSelector: {}
+    podMonitorSelectorNilUsesHelmValues: false
+    podMonitorNamespaceSelector: {}
+
+alertmanager:
+  alertmanagerSpec:
+    # Alertmanager calls this field `storage` in chart 57.0.0.
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 2Gi
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+grafana:
+  enabled: true
+  ingress:
+    enabled: false
+  service:
+    type: ClusterIP
+  persistence:
+    enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 320Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  grafana.ini:
+    server:
+      domain: grafana.dat.com
+      root_url: https://grafana.dat.com/
+      serve_from_sub_path: false
+
+  # Chart 57.0.0's default is admin / prom-operator. Change it via a private,
+  # ignored values override or an existing Kubernetes Secret; never commit a
+  # real password in this file. Example private override:
+  # adminPassword: "SET_A_UNIQUE_PASSWORD"
+
+# Alertmanager uses a null receiver by default and sends no notifications.
+# Store webhook credentials in a Kubernetes Secret and mount it through
+# alertmanager.alertmanagerSpec.secrets; configure receivers/routes here.
+# Example shape (do not put webhook URLs or credentials in Git):
+# alertmanager:
+#   alertmanagerSpec:
+#     secrets:
+#       - alertmanager-notifications
+#   config:
+#     global: {}
+#     route:
+#       receiver: team-notifications
+#     receivers:
+#       - name: team-notifications
+#         slack_configs:
+#           - api_url_file: /etc/alertmanager/secrets/alertmanager-notifications/slack_api_url
