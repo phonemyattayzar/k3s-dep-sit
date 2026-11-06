@@ -21,6 +21,9 @@ spec:
             - name: install-kubectl
               image: curlimages/curl:8.23.0
               command: ["/bin/sh", "-ec"]
+              envFrom:
+                - configMapRef:
+                    name: ecr-registry
               args:
                 - |
                   echo "Downloading kubectl $KUBECTL_VERSION"
