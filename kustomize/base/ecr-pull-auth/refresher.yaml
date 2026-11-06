@@ -1,0 +1,66 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ecr-pull-secret-refresh
+  namespace: ecr-system
+spec:
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          serviceAccountName: ecr-token-refresher
+          hostNetwork: true
+          dnsPolicy: ClusterFirstWithHostNet
+          restartPolicy: Never
+          initContainers:
+            - name: install-kubectl
+              image: curlimages/curl:8.23.0
+              command: ["/bin/sh", "-ec"]
+              args:
+                - |
+                  curl -fsSL https://dl.k8s.io/release/v1.29.3/bin/linux/amd64/kubectl -o /tools/kubectl
+                  curl -fsSL https://dl.k8s.io/release/v1.29.3/bin/linux/amd64/kubectl.sha256 -o /tools/kubectl.sha256
+                  echo "$(cat /tools/kubectl.sha256)  /tools/kubectl" | sha256sum -c -
+                  chmod 0555 /tools/kubectl
+              volumeMounts:
+                - name: tools
+                  mountPath: /tools
+          containers:
+            - name: refresh
+              image: public.ecr.aws/aws-cli/aws-cli:2.39.4
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/sh", "-ec"]
+              args:
+                - |
+                  password="$(aws ecr get-login-password --region "$AWS_REGION")"
+                  auth="$(printf 'AWS:%s' "$password" | base64 | tr -d '\n')"
+                  docker_config="$(printf '{\"auths\":{\"%s\":{\"username\":\"AWS\",\"password\":\"%s\",\"auth\":\"%s\"}}}' "$ECR_REGISTRY" "$password" "$auth" | base64 | tr -d '\n')"
+                  patch="$(printf '{\"data\":{\".dockerconfigjson\":\"%s\"}}' "$docker_config")"
+                  /tools/kubectl patch secret "$ECR_SECRET_NAME" \
+                    --namespace "$ECR_TARGET_NAMESPACE" \
+                    --type=merge \
+                    --patch "$patch"
+              envFrom:
+                - configMapRef:
+                    name: ecr-registry
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - name: tools
+                  mountPath: /tools
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tools
+              emptyDir: {}
+            - name: tmp
+              emptyDir: {}

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "sar-mel-backend.fullname" . }}
+  labels:
+    {{- include "sar-mel-backend.labels" . | nindent 4 }}
+data:
+  ALGORITHM: {{ .Values.config.algorithm | quote }}
+  ACCESS_TOKEN_EXPIRE_MINUTES: {{ .Values.config.accessTokenExpireMinutes | quote }}

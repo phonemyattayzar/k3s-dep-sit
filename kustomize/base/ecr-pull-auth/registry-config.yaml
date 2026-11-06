@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecr-registry
+  namespace: ecr-system
+data:
+  AWS_REGION: ap-southeast-1
+  ECR_REGISTRY: 051131628511.dkr.ecr.ap-southeast-1.amazonaws.com
+  ECR_TARGET_NAMESPACE: default
+  ECR_SECRET_NAME: ecr-pull-secret

@@ -1,0 +1,12 @@
+apiVersion: v2
+name: sar-mel-frontend
+description: Helm chart for the Sar Mel React frontend (nginx)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - sar-mel
+  - react
+  - nginx
+maintainers:
+  - name: Sar Mel Team

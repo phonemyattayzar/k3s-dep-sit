@@ -1,0 +1,62 @@
+replicaCount: 1
+
+image:
+  repository: 474668404370.dkr.ecr.ap-southeast-1.amazonaws.com/dev-registry
+  tag: sar-mel-backend-latest
+  pullPolicy: Always
+
+# Required only if cluster nodes cannot pull from ECR via IAM (see examples/ecr-image-pull-secret.md)
+imagePullSecrets:
+  - name: ecr-registry-credentials
+
+ingress:
+  enabled: true
+  # k3d: Traefik is exposed on host port 8080 (not MetalLB/nginx IP).
+  # /etc/hosts:  127.0.0.1 api-dev.sar-mel.example.com
+  # Browser URL: http://api-dev.sar-mel.example.com:8080/
+  className: traefik
+  hosts:
+    - host: api-dev.sar-mel.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+autoscaling:
+  enabled: false
+
+database:
+  host: postgres.sar-mel-dev.svc.cluster.local
+  port: 5432
+
+secret:
+  postgresUser: postgres
+  postgresDb: food_db
+  postgresPassword: dev-postgres-password
+  secretKey: dev-jwt-secret-change-me
+
+migration:
+  enabled: true
+
+persistence:
+  enabled: true
+  size: 2Gi
+  accessMode: ReadWriteOnce
+  mountPath: /app/uploads
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+  automount: true
+
+service:
+  type: ClusterIP
+  port: 8000
+  annotations: {}
+
+config:
+  algorithm: "HS256"
+  accessTokenExpireMinutes: "11520"
+
+
+

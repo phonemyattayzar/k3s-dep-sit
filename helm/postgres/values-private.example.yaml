@@ -1,0 +1,4 @@
+# Copy this file to values-private.yaml, replace the value, and keep the copy
+# out of Git. The copied filename is listed in the repository .gitignore.
+auth:
+  password: "REPLACE_WITH_A_LONG_RANDOM_PASSWORD"

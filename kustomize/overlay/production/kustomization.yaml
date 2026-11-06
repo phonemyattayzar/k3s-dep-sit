@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base/ecr-pull-auth
+  - namespace-resources/argocd
+  - namespace-resources/cert-manager
+  - namespace-resources/envoy-gateway
+  - namespace-resources/postgres
+  - namespace-resources/postgres

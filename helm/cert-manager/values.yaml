@@ -1,0 +1,2 @@
+# Preserve the existing cert-manager release setting.
+installCRDs: true

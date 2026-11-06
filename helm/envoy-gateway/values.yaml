@@ -1,0 +1,32 @@
+# Envoy Gateway Helm chart values.
+# Configure the generated Envoy data-plane Service (the Service targeted by
+# the NLB), rather than the control-plane Service.
+crds:
+  gatewayAPI:
+    # This cluster's Kubernetes API does not support ValidatingAdmissionPolicy.
+    # Keep installing/upgrading the Gateway API CRDs, but skip the optional
+    # safe-upgrade policy resources that require Kubernetes 1.30+.
+    safeUpgradePolicy:
+      enabled: false
+
+config:
+  envoyGateway:
+    envoyProxy:
+      provider:
+        type: Kubernetes
+        kubernetes:
+          envoyService:
+            type: NodePort
+            # Keep the NLB target ports stable. This strategic merge patch
+            # matches generated Service ports by their service port (80/443/5432).
+            patch:
+              type: StrategicMerge
+              value:
+                spec:
+                  ports:
+                    - port: 80
+                      nodePort: 30080
+                    - port: 443
+                      nodePort: 30443
+                    - port: 5432
+                      nodePort: 30543

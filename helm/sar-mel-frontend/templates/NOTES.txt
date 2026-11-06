@@ -1,0 +1,11 @@
+Sar Mel frontend deployed.
+
+{{- if .Values.ingress.enabled }}
+Open: http{{ if .Values.ingress.tls }}s{{ end }}://{{ (index .Values.ingress.hosts 0).host }}
+{{- else }}
+Port-forward: kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "sar-mel-frontend.fullname" . }} 8080:{{ .Values.service.port }}
+{{- end }}
+
+When backend.proxyApi=true, /api/v1 is proxied to {{ include "sar-mel-frontend.backendHost" . }}:{{ .Values.backend.servicePort }}
+
+Build image with: VITE_API_BASE={{ .Values.config.apiBaseUrl }}

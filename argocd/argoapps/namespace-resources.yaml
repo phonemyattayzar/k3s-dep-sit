@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: namespace-resources
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/REPLACE_ME/k3s-dep-dat.git
+    targetRevision: main
+    path: kustomize/overlay/production
+  destination:
+    server: https://kubernetes.default.svc
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: ecr-pull-secret
+      namespace: default
+      jsonPointers:
+        - /data/.dockerconfigjson
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - RespectIgnoreDifferences=true

@@ -1,0 +1,8 @@
+# Overrides for the existing argo-cd Helm release (chart 6.7.1).
+# TLS terminates at Envoy Gateway; Argo CD serves HTTP inside the cluster.
+global:
+  domain: argocd.dat.com
+
+configs:
+  params:
+    server.insecure: true
