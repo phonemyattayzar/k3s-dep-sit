@@ -8,4 +8,4 @@ data:
   ECR_REGISTRY: 051131628511.dkr.ecr.ap-southeast-1.amazonaws.com
   ECR_TARGET_NAMESPACES: default,sar-mel
   ECR_SECRET_NAME: ecr-pull-secret
-  KUBECTL_VERSION: v1.34.13
+  KUBECTL_VERSION_CHANNEL: stable-1.34
