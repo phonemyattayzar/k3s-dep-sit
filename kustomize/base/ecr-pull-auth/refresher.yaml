@@ -23,8 +23,11 @@ spec:
               command: ["/bin/sh", "-ec"]
               args:
                 - |
+                  echo "Downloading kubectl $KUBECTL_VERSION"
                   curl -fsSL "https://dl.k8s.io/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl" -o /tools/kubectl
+                  echo "Downloading kubectl checksum"
                   curl -fsSL "https://dl.k8s.io/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl.sha256" -o /tools/kubectl.sha256
+                  echo "Verifying kubectl checksum"
                   echo "$(cat /tools/kubectl.sha256)  /tools/kubectl" | sha256sum -c -
                   chmod 0555 /tools/kubectl
               volumeMounts:
