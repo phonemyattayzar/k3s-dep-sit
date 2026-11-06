@@ -2,7 +2,7 @@
 
 The `k3s-dep-dat-ecr-pull` EC2 role and instance profile are attached to the
 k3s node `i-08136987a64c2cbdc`. Its policy permits ECR token retrieval and image
-pulls from the `k3s-dep-dat` repository only. The ECR authorization token is
+pulls from `k3s-dep-dat`, `sar-mel-backend`, and `sar-mel-frontend`. The ECR authorization token is
 short-lived; the Kustomize credential refresher rotates the Kubernetes pull
 Secret every six hours. The current Secret is created in `default`; add a
 matching Secret and service account reference in each application namespace
