@@ -22,17 +22,39 @@ Install Gateway API v1.6.1 standard CRDs before syncing the production overlay;
 they are cluster-scoped prerequisites and are upgraded separately from the
 Envoy Gateway Helm release.
 
-Before bootstrapping, replace every `https://github.com/REPLACE_ME/k3s-dep-dat.git`
-with the actual Git remote, and change `targetRevision: main` if the repository
-uses another branch. This checkout currently has no Git remote, so the root
-Application is intentionally not applied.
+The root and child Applications point to
+`git@github.com:phonemyattayzar/k3s-dep-sit.git` on branch `main`. Ensure this
+checkout is pushed to that repository and Argo CD has an SSH deploy key or
+repository credential configured before bootstrapping.
 
-After pushing the repository and updating the URLs, bootstrap once with:
+After pushing the repository, bootstrap once with:
 
 ```powershell
 kubectl apply -f .\argocd\root-app.yaml
 ```
 
 The namespace resources app ignores only the data field of the runtime-generated
-`default/ecr-pull-secret`, so Argo CD won’t replace its refreshed token with the
-placeholder stored in Git.
+`ecr-pull-secret` in the `default` and `sar-mel` namespaces, so Argo CD won’t
+replace refreshed ECR tokens with the placeholder stored in Git.
+
+## Sar Mel applications
+
+The root app also creates manually synced `sar-mel-backend` and
+`sar-mel-frontend` Applications. Sync `namespace-resources` first so the
+`sar-mel` namespace and ECR pull-secret placeholder exist. The ECR refresher
+then updates that pull secret; its token refreshes every six hours.
+
+Before syncing the backend, create `sar-mel-backend-secrets` in namespace
+`sar-mel` through your secret manager. It must contain `SECRET_KEY`,
+`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, and `DATABASE_URL`. Set the
+database values to the existing PostgreSQL release (`postgres.postgres.svc`,
+database `appdb`, user `appuser`). URL-encode special characters in the
+credentials used in `DATABASE_URL`. Secret values must not be committed in
+plain text. Configure the source in SOPS or an External Secrets controller if
+you want Argo CD to manage that Secret declaratively; neither secret controller
+is installed by this repository today.
+
+The frontend is exposed at `https://sar-mel.dat.com` through the existing
+Envoy Gateway wildcard certificate. Its NGINX config proxies `/api/` and
+`/static/` to the backend Service inside the `sar-mel` namespace. The backend
+Service itself is internal-only.

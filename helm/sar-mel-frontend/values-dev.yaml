@@ -1,43 +1,5 @@
-replicaCount: 1
-
-image:
-  repository: 474668404370.dkr.ecr.ap-southeast-1.amazonaws.com/sar-mel/sar-mel-frontend
-  tag: latest
-  pullPolicy: Always
-
-imagePullSecrets:
-  - name: ecr-registry-credentials
-
-ingress:
-  enabled: true
-  className: nginx
-  hosts:
-    - host: sar-mel.mm.net
-      paths:
-        - path: /
-          pathType: Prefix
-
-backend:
-  serviceName: sar-mel-backend
-  serviceNamespace: sar-mel-dev
-  servicePort: 8000
-  proxyApi: true
-
-autoscaling:
+# Development-only overrides.
+route:
   enabled: false
-
-config:
-  apiBaseUrl: "/api/v1"
-
-serviceAccount:
-  create: true
-  annotations: {}
-  name: ""
-  automount: true
-
-service:
-  type: ClusterIP
-  port: 80
-  annotations: {}
-
-
+backend:
+  serviceNamespace: sar-mel-dev

@@ -1,25 +1,19 @@
 replicaCount: 1
 
 image:
-  repository: 474668404370.dkr.ecr.ap-southeast-1.amazonaws.com/dev-registry
-  tag: sar-mel-frontend-latest
+  repository: 051131628511.dkr.ecr.ap-southeast-1.amazonaws.com/sar-mel-frontend
+  tag: latest
   pullPolicy: Always
 
 imagePullSecrets:
-  - name: ecr-registry-credentials
+  - name: ecr-pull-secret
 
 ingress:
-  enabled: true
-  className: traefik
-  hosts:
-    - host: sar-mel.mm.net
-      paths:
-        - path: /
-          pathType: Prefix
+  enabled: false
 
 backend:
   serviceName: sar-mel-backend
-  serviceNamespace: sar-mel-dev
+  serviceNamespace: sar-mel
   servicePort: 8000
   proxyApi: true
 
@@ -33,11 +27,53 @@ serviceAccount:
   create: true
   annotations: {}
   name: ""
-  automount: true
+  automount: false
 
 service:
   type: ClusterIP
   port: 80
   annotations: {}
+
+route:
+  enabled: true
+  hostname: sar-mel.dat.com
+
+podAnnotations: {}
+podLabels: {}
+extraEnv: []
+nodeSelector: {}
+affinity: {}
+tolerations: []
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 101
+  runAsGroup: 101
+  seccompProfile:
+    type: RuntimeDefault
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
 
 

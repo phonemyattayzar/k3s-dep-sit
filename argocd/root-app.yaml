@@ -6,8 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    # Replace this with the Git remote for this repository before applying.
-    repoURL: https://github.com/REPLACE_ME/k3s-dep-dat.git
+    repoURL: git@github.com:phonemyattayzar/k3s-dep-sit.git
     targetRevision: main
     path: argocd/argoapps
   destination:

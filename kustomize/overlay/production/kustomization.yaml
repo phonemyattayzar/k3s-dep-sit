@@ -6,4 +6,4 @@ resources:
   - namespace-resources/cert-manager
   - namespace-resources/envoy-gateway
   - namespace-resources/postgres
-  - namespace-resources/postgres
+  - namespace-resources/sar-mel

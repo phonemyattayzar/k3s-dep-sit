@@ -45,6 +45,9 @@ spec:
                 name: {{ include "sar-mel-backend.secretName" . }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -72,6 +75,8 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:
+            - name: tmp
+              mountPath: /tmp
             {{- if .Values.persistence.enabled }}
             - name: uploads
               mountPath: {{ .Values.persistence.mountPath }}
@@ -80,6 +85,8 @@ spec:
             {{- toYaml . | nindent 12 }}
             {{- end }}
       volumes:
+        - name: tmp
+          emptyDir: {}
         {{- if .Values.persistence.enabled }}
         - name: uploads
           persistentVolumeClaim:

@@ -1,38 +1,31 @@
 replicaCount: 1
 
 image:
-  repository: 474668404370.dkr.ecr.ap-southeast-1.amazonaws.com/dev-registry
-  tag: sar-mel-backend-latest
+  repository: 051131628511.dkr.ecr.ap-southeast-1.amazonaws.com/sar-mel-backend
+  tag: latest
   pullPolicy: Always
 
-# Required only if cluster nodes cannot pull from ECR via IAM (see examples/ecr-image-pull-secret.md)
+# Refreshed every six hours by the ECR pull-secret CronJob.
 imagePullSecrets:
-  - name: ecr-registry-credentials
+  - name: ecr-pull-secret
 
 ingress:
-  enabled: true
-  # k3d: Traefik is exposed on host port 8080 (not MetalLB/nginx IP).
-  # /etc/hosts:  127.0.0.1 api-dev.sar-mel.example.com
-  # Browser URL: http://api-dev.sar-mel.example.com:8080/
-  className: traefik
-  hosts:
-    - host: api-dev.sar-mel.example.com
-      paths:
-        - path: /
-          pathType: Prefix
+  enabled: false
 
 autoscaling:
   enabled: false
 
 database:
-  host: postgres.sar-mel-dev.svc.cluster.local
+  host: postgres.postgres.svc.cluster.local
   port: 5432
+  name: appdb
+  user: appuser
 
-secret:
-  postgresUser: postgres
-  postgresDb: food_db
-  postgresPassword: dev-postgres-password
-  secretKey: dev-jwt-secret-change-me
+# Create this Secret in the release namespace before the first Argo CD sync.
+# Required keys: SECRET_KEY, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB,
+# DATABASE_URL. Keep secret values outside Git (for example, SOPS/External
+# Secrets); never put production credentials in this values file.
+existingSecret: sar-mel-backend-secrets
 
 migration:
   enabled: true
@@ -47,7 +40,7 @@ serviceAccount:
   create: true
   annotations: {}
   name: ""
-  automount: true
+  automount: false
 
 service:
   type: ClusterIP
@@ -57,6 +50,46 @@ service:
 config:
   algorithm: "HS256"
   accessTokenExpireMinutes: "11520"
+
+route:
+  enabled: false
+
+podAnnotations: {}
+podLabels: {}
+extraEnv: []
+extraVolumes: []
+extraVolumeMounts: []
+nodeSelector: {}
+affinity: {}
+tolerations: []
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+livenessProbe:
+  tcpSocket:
+    port: http
+  initialDelaySeconds: 20
+  periodSeconds: 10
+readinessProbe:
+  tcpSocket:
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
 
 
 

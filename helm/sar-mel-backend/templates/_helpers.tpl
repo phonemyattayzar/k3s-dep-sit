@@ -84,9 +84,9 @@ Database URL
 {{- if .Values.database.url }}
 {{- .Values.database.url }}
 {{- else }}
-{{- $user := .Values.secret.postgresUser }}
+{{- $user := .Values.database.user }}
 {{- $pass := .Values.secret.postgresPassword }}
-{{- $db := .Values.secret.postgresDb }}
+{{- $db := .Values.database.name }}
 {{- $host := .Values.database.host }}
 {{- $port := .Values.database.port }}
 {{- printf "postgresql://%s:%s@%s:%v/%s" $user $pass $host $port $db }}

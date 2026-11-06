@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/REPLACE_ME/k3s-dep-dat.git
+    repoURL: git@github.com:phonemyattayzar/k3s-dep-sit.git
     targetRevision: main
     path: kustomize/overlay/production
   destination:
@@ -16,6 +16,12 @@ spec:
       kind: Secret
       name: ecr-pull-secret
       namespace: default
+      jsonPointers:
+        - /data/.dockerconfigjson
+    - group: ""
+      kind: Secret
+      name: ecr-pull-secret
+      namespace: sar-mel
       jsonPointers:
         - /data/.dockerconfigjson
   syncPolicy:
