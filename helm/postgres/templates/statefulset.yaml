@@ -18,11 +18,17 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: postgres
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # container-level securityContext ကို ဖယ်ရှားလိုက်ပါ (သို့မဟုတ် runAsUser ကို ဖြုတ်ပါ)
+          args:
+            - "postgres"
+            - "-c"
+            - "listen_addresses=*"
           ports:
             - name: postgres
               containerPort: 5432
@@ -38,32 +44,12 @@ spec:
                   name: {{ include "postgres.fullname" . }}-credentials
                   key: password
             - name: PGDATA
-              value: /var/lib/postgresql/18/docker
-          readinessProbe:
-            exec:
-              command:
-                - sh
-                - -ec
-                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 6
-          livenessProbe:
-            exec:
-              command:
-                - sh
-                - -ec
-                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
-            initialDelaySeconds: 30
-            periodSeconds: 20
-            timeoutSeconds: 5
-            failureThreshold: 6
+              value: /var/lib/postgresql/data
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: data
-              mountPath: /var/lib/postgresql
+              mountPath: /var/lib/postgresql/data
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
     - metadata:
