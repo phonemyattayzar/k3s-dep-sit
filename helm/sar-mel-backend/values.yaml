@@ -28,7 +28,7 @@ secret:
 # Required keys: SECRET_KEY, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB,
 # DATABASE_URL. Keep secret values outside Git (for example, SOPS/External
 # Secrets); never put production credentials in this values file.
-existingSecret: sar-mel-backend-secrets
+existingSecret: ""
 
 migration:
   enabled: true
