@@ -2,4 +2,4 @@
 # namespace using a secret manager; never store database or signing keys here.
 route:
   enabled: false
-existingSecret: sar-mel-backend-secrets
+existingSecret: ""
