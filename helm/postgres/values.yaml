@@ -32,6 +32,53 @@ resources:
     cpu: "1"
     memory: 1Gi
 
+# Pod-level security context (volume ownership)
 podSecurityContext:
   fsGroup: 999
   fsGroupChangePolicy: OnRootMismatch
+
+# Container-level security context.
+# Running as the postgres user (UID/GID 999 on Debian images) makes the
+# image entrypoint skip `gosu`. Use 70 instead of 999 for -alpine images.
+#
+# TEST ONLY: seccomp/AppArmor are set to Unconfined to check whether the node's
+# security layer blocks signals between Postgres processes (kill -> EPERM).
+# If this fixes the hang, find which of the two is responsible and relax only
+# that one; then remove the other line to restore the default (RuntimeDefault).
+containerSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  allowPrivilegeEscalation: false
+  seccompProfile:
+    type: Unconfined
+  appArmorProfile:
+    type: Unconfined
+
+# Size of the in-memory /dev/shm volume (default in containers is only 64Mi)
+shmSize: 256Mi
+
+# Extra postgres server arguments, e.g.:
+# extraArgs:
+#   - "-c"
+#   - "io_method=sync"
+extraArgs: []
+
+probes:
+  # Disabled while debugging so Kubernetes does not kill a slow/hung start.
+  # Enable again (with startup enabled) once Postgres starts normally.
+  startup:
+    enabled: false
+    periodSeconds: 5
+    timeoutSeconds: 5
+    failureThreshold: 60
+  readiness:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  liveness:
+    enabled: false
+    initialDelaySeconds: 30
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 6
