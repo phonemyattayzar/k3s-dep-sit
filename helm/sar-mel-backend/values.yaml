@@ -23,6 +23,7 @@ database:
 
 secret:
   postgresPassword: "admin123"
+  secretKey: "RwoKi1IhrXc529TH6EGgNSBJxF8WeODaCp0lPtMzAqQmUVvYds"
 
 # Create this Secret in the release namespace before the first Argo CD sync.
 # Required keys: SECRET_KEY, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB,
