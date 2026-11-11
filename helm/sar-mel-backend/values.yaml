@@ -58,7 +58,8 @@ config:
 route:
   enabled: false
 
-podAnnotations: {}
+podAnnotations:
+  sar-mel.dat.com/image-digest: sha256:db2796b37e38ecb645dd4b4fbb2cbe2d4ccbffa1f10e5740223a6d4241722e3a
 podLabels: {}
 extraEnv: []
 extraVolumes: []

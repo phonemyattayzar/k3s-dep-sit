@@ -38,7 +38,8 @@ route:
   enabled: true
   hostname: sar-mel.dat.com
 
-podAnnotations: {}
+podAnnotations:
+  sar-mel.dat.com/image-digest: sha256:35b872de7b339316f7706c9029597ea05be3b00f66599773e2bb21007e30877d
 podLabels: {}
 extraEnv: []
 nodeSelector: {}
