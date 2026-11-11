@@ -1,0 +1,11 @@
+{{- if and (not .Values.appsConfig.existingConfigMap) .Values.appsConfig.data }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "k3s-operator.fullname" . }}-apps
+  labels:
+    {{- include "k3s-operator.labels" . | nindent 4 }}
+data:
+  apps.yaml: |
+{{ .Values.appsConfig.data | indent 4 }}
+{{- end }}

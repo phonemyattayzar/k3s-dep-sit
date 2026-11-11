@@ -1,0 +1,122 @@
+{{- if semverCompare ">=1.21-0" .Capabilities.KubeVersion.Version -}}
+apiVersion: batch/v1
+{{- else -}}
+apiVersion: batch/v1beta1
+{{- end }}
+kind: CronJob
+metadata:
+  name: {{ include "k3s-operator.fullname" . }}
+  labels:
+    {{- include "k3s-operator.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.operator.schedule | quote }}
+  concurrencyPolicy: {{ .Values.operator.concurrencyPolicy }}
+  successfulJobsHistoryLimit: {{ .Values.operator.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.operator.failedJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "k3s-operator.selectorLabels" . | nindent 12 }}
+          {{- with .Values.podAnnotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        spec:
+          restartPolicy: {{ .Values.operator.restartPolicy }}
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.podSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+            - name: {{ .Chart.Name }}
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              args: []
+              {{- with .Values.securityContext }}
+              securityContext:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              env:
+                - name: CONFIG_PATH
+                  value: /etc/k3s-operator/apps.yaml
+                - name: GITOPS_REPO_URL
+                  value: {{ .Values.gitops.repoUrl | quote }}
+                - name: GITOPS_BRANCH
+                  value: {{ .Values.gitops.branch | quote }}
+                - name: GIT_USER_NAME
+                  value: {{ .Values.gitops.userName | quote }}
+                - name: GIT_USER_EMAIL
+                  value: {{ .Values.gitops.userEmail | quote }}
+                - name: DRY_RUN
+                  value: {{ .Values.operator.dryRun | quote }}
+                - name: VERBOSE
+                  value: {{ .Values.operator.verbose | quote }}
+                - name: REGISTRY_AUTH_FILE
+                  value: /etc/docker/config.json
+                {{- if or .Values.gitops.token .Values.gitops.existingSecretName }}
+                - name: GITOPS_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ default (printf "%s-gitops" (include "k3s-operator.fullname" .)) .Values.gitops.existingSecretName }}
+                      key: {{ default "token" .Values.gitops.existingSecretKey }}
+                {{- end }}
+              volumeMounts:
+                - name: vol-apps-config
+                  mountPath: /etc/k3s-operator
+                  readOnly: true
+                {{- if or .Values.registryAuth.authFile .Values.registryAuth.existingSecret }}
+                - name: vol-registry-auth
+                  mountPath: /etc/docker
+                  readOnly: true
+                {{- end }}
+                {{- if .Values.gitops.sshSecretName }}
+                - name: vol-git-ssh
+                  mountPath: /etc/git-secret
+                  readOnly: true
+                {{- end }}
+                - name: vol-workspace
+                  mountPath: /tmp
+              {{- with .Values.resources }}
+              resources:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+          volumes:
+            - name: vol-apps-config
+              configMap:
+                name: {{ default (printf "%s-apps" (include "k3s-operator.fullname" .)) .Values.appsConfig.existingConfigMap }}
+            {{- if or .Values.registryAuth.authFile .Values.registryAuth.existingSecret }}
+            - name: vol-registry-auth
+              secret:
+                secretName: {{ default (printf "%s-registry-auth" (include "k3s-operator.fullname" .)) .Values.registryAuth.existingSecret }}
+                {{- if .Values.registryAuth.existingSecret }}
+                items:
+                  - key: {{ .Values.registryAuth.secretKey | default ".dockerconfigjson" }}
+                    path: config.json
+                {{- end }}
+            {{- end }}
+            {{- if .Values.gitops.sshSecretName }}
+            - name: vol-git-ssh
+              secret:
+                secretName: {{ .Values.gitops.sshSecretName }}
+                defaultMode: 0400
+            {{- end }}
+            - name: vol-workspace
+              emptyDir: {}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}

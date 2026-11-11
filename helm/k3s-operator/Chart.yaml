@@ -1,0 +1,16 @@
+apiVersion: v2
+name: k3s-operator
+description: Helm chart for K3s / Kubernetes GitOps Operator
+type: application
+version: 0.2.0
+appVersion: "0.2.0"
+maintainers:
+  - name: Frontiir DevOps
+    email: int-dev@frontiir.net
+keywords:
+  - gitops
+  - argocd
+  - k3s
+  - kubernetes
+  - operator
+  - helm

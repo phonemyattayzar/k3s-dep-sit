@@ -1,0 +1,94 @@
+# Default values for k3s-operator in k3s-dep-sit.
+# This is a YAML-formatted file.
+
+image:
+  repository: 051131628511.dkr.ecr.ap-southeast-1.amazonaws.com/k3s-operator
+  pullPolicy: Always
+  tag: "latest"
+
+imagePullSecrets:
+  - name: ecr-pull-secret
+
+nameOverride: ""
+fullnameOverride: "k3s-operator"
+
+operator:
+  # CronJob schedule (every 3 minutes)
+  schedule: "*/3 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  restartPolicy: OnFailure
+  dryRun: false
+  verbose: true
+
+podAnnotations: {}
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+
+securityContext:
+  readOnlyRootFilesystem: false
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+resources:
+  limits:
+    cpu: 250m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# GitOps Repository Settings
+gitops:
+  repoUrl: "git@github.com:phonemyattayzar/k3s-dep-sit.git"
+  branch: "main"
+  userName: "Phone Myat Tay Zar Kyaw"
+  userEmail: "25-00400@dat.com"
+  token: ""
+  existingSecretName: ""
+  existingSecretKey: "token"
+  sshSecretName: "k3s-operator-ssh"
+
+# Applications definition configuration
+appsConfig:
+  existingConfigMap: ""
+  data: |
+    apps:
+      - appName: sar-mel-backend
+        deployments:
+          - trackingType: branch
+            envName: sit
+            imageType: api
+            imageRepositoryPath: ".image.repository"
+            imageTagPath: ".image.tag"
+            imageDefaultTag: latest
+            podAnnotation: sar-mel.dat.com/image-digest
+            podAnnotationsPath: ".podAnnotations"
+            valuesFilePath: helm/sar-mel-backend/values.yaml
+
+      - appName: sar-mel-frontend
+        deployments:
+          - trackingType: branch
+            envName: sit
+            imageType: web-ui
+            imageRepositoryPath: ".image.repository"
+            imageTagPath: ".image.tag"
+            imageDefaultTag: latest
+            podAnnotation: sar-mel.dat.com/image-digest
+            podAnnotationsPath: ".podAnnotations"
+            valuesFilePath: helm/sar-mel-frontend/values.yaml
+
+# Container Registry Authentication: uses the existing ecr-pull-secret rotated by ecr-pull-secret-refresh
+registryAuth:
+  existingSecret: "ecr-pull-secret"
+  authFile: ""
