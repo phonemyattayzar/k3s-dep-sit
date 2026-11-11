@@ -39,7 +39,7 @@ route:
   hostname: sar-mel.dat.com
 
 podAnnotations:
-  sar-mel.dat.com/image-digest: sha256:35b872de7b339316f7706c9029597ea05be3b00f66599773e2bb21007e30877d
+  sar-mel.dat.com/image-digest: sha256:525762ac6a753fdd3c4a88054cbebba6bd976e5396ad650063578238002bfd31
 podLabels: {}
 extraEnv: []
 nodeSelector: {}

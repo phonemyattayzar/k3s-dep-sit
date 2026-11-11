@@ -59,7 +59,7 @@ route:
   enabled: false
 
 podAnnotations:
-  sar-mel.dat.com/image-digest: sha256:db2796b37e38ecb645dd4b4fbb2cbe2d4ccbffa1f10e5740223a6d4241722e3a
+  sar-mel.dat.com/image-digest: sha256:cf1e8e5fde7d82eb4f9d5b3e50396a2fa81f5b468495eb0e6b1cac2f8234054b
 podLabels: {}
 extraEnv: []
 extraVolumes: []
