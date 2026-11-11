@@ -16,5 +16,9 @@ spec:
     server: https://kubernetes.default.svc
     namespace: sar-mel
   syncPolicy:
+    # Auto-Sync ကို ဤနေရာတွင် ဖွင့်ပေးထားပါသည်
+    automated:
+      prune: true       # Git ထဲမှ Helm release / resources များကို ဖျက်လိုက်ပါက cluster တွင်လည်း အလိုအလျောက် ဖျက်မည်
+      selfHeal: true    # Cluster ထဲရှိ resources များကို ပြင်ပမှ မတော်တဆ ဝင်ပြင်ထားပါက GitOps မူလအတိုင်း ပြန်လည် တည့်မတ်မည်
     syncOptions:
       - CreateNamespace=false
