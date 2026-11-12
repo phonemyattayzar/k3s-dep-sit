@@ -16,13 +16,13 @@ autoscaling:
   enabled: false
 
 database:
-  host: "postgres.postgres.svc.cluster.local"
-  port: 5432
+  host: "172.31.12.7"
+  port: 5000
   name: "appdb"
   user: "appuser"
 
 secret:
-  postgresPassword: "admin123"
+  postgresPassword: "sarmel2026"
   secretKey: "RwoKi1IhrXc529TH6EGgNSBJxF8WeODaCp0lPtMzAqQmUVvYds"
 
 # Create this Secret in the release namespace before the first Argo CD sync.
