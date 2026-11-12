@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-db-cluster
+  namespace: monitoring
+  labels:
+    app: postgres-db-cluster
+spec:
+  ports:
+  - name: metrics
+    port: 9100
+    targetPort: 9100
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: postgres-db-cluster
+  namespace: monitoring
+subsets:
+- addresses:
+  - ip: 172.31.7.43    # Node 1 (Primary) IP
+  - ip: 172.31.5.238   # Node 2 (Replica) IP
+  ports:
+  - port: 9100
+    name: metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: external-db-monitor
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: postgres-db-cluster
+  endpoints:
+  - port: metrics
+    interval: 15s
